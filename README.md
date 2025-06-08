@@ -36,35 +36,60 @@ Este proyecto implementa una **arquitectura de streaming distribuida** completa,
 
 ```mermaid
 graph TB
+    %% Definición de estilos para los subgrafos
+    classDef datasource fill:#e1f5fe,stroke:#039be5,stroke-width:2px
+    classDef ingestion fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+    classDef broker fill:#fff3e0,stroke:#fb8c00,stroke-width:2px
+    classDef processing fill:#e8f5e8,stroke:#43a047,stroke-width:2px
+    classDef storage fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+    classDef api fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    classDef visualization fill:#fff8e1,stroke:#ffa000,stroke-width:2px
+    classDef analytics fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+
+    %% Nodos principales (fuera de los subgrafos)
+    A[🔗 PokeAPI]
+    B[📡 Pokemon Producer<br/>Python]
+    C[🚀 Apache Kafka<br/>Topic: pokemon-data]
+    D[⚡ Apache Spark<br/>Streaming]
+    E[🗄️ Apache Cassandra]
+    F[🌐 REST API<br/>Flask]
+    G[📊 Grafana Dashboard]
+    H[📈 Jupyter Analytics]
+
+    %% Subgrafos (solo para agrupación visual)
     subgraph "Data Source"
-        A[🔗 PokeAPI]
+        A
     end
     
     subgraph "Data Ingestion"
-        B[📡 Pokemon Producer<br/>Python]
+        B
     end
     
     subgraph "Message Broker"
-        C[🚀 Apache Kafka<br/>Topic: pokemon-data]
+        C
     end
     
     subgraph "Stream Processing"
-        D[⚡ Apache Spark<br/>Streaming]
+        D
     end
     
     subgraph "Storage Layer"
-        E[🗄️ Apache Cassandra<br/>NoSQL Database]
+        E
     end
     
     subgraph "API Layer"
-        F[🌐 REST API<br/>Flask]
+        F
     end
     
     subgraph "Visualization"
-        G[📊 Grafana Dashboard]
-        H[📈 Jupyter Analytics]
+        G
     end
     
+    subgraph "Analytics"
+        H
+    end
+
+    %% Conexiones
     A --> B
     B --> C
     C --> D
@@ -72,15 +97,16 @@ graph TB
     E --> F
     F --> G
     F --> H
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#fff3e0
-    style D fill:#e8f5e8
-    style E fill:#fce4ec
-    style F fill:#f1f8e9
-    style G fill:#fff8e1
-    style H fill:#e3f2fd
+
+    %% Aplicar estilos
+    class A datasource
+    class B ingestion
+    class C broker
+    class D processing
+    class E storage
+    class F api
+    class G visualization
+    class H analytics
 ```
 
 ### 🔧 Componentes del Sistema
