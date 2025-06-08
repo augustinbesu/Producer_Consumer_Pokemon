@@ -353,25 +353,79 @@ make setup             # Reconstruir completo
 ### 🔴 Servicios no inician
 ```bash
 docker compose logs <servicio>
-docker system df  # Verificar espacio
+docker system df  # Verificar espacio en disco
+make clean        # Limpiar recursos
 ```
 
 ### 🟡 Cassandra no responde
 ```bash
-# Esperar 1-2 minutos para inicialización
+# Esperar 1-2 minutos para inicialización completa
 docker exec cassandra nodetool status
+docker exec cassandra cqlsh -e "DESCRIBE KEYSPACES;"
 ```
 
-### 🟠 Spark desconectado
+### 🟠 Spark desconectado de Cassandra
 ```bash
 docker exec spark-processor ping cassandra
 make restart-spark
+docker compose logs spark-processor
 ```
 
-### 🔵 Grafana sin datos
+### 🔵 **Grafana no muestra datos (API 404)**
+**Síntoma:** Los endpoints `/api/total-pokemon` devuelven 404
+**Causa:** Docker está ejecutando versión anterior del código sin los nuevos endpoints
+
+**Solución:**
 ```bash
+# Reconstruir específicamente la API
+docker compose stop pokemon-api
+docker compose build --no-cache pokemon-api
+docker compose up -d pokemon-api
+
+# Verificar que funciona
 curl http://localhost:5000/api/total-pokemon
-# Verificar datasource en Grafana UI
+# Debería devolver: {"total": X}
+```
+
+### 🟣 Kafka topic no existe
+```bash
+# Crear topic manualmente si falla kafka-setup.sh
+docker exec kafka kafka-topics --create \
+    --bootstrap-server localhost:9092 \
+    --replication-factor 1 \
+    --partitions 3 \
+    --topic pokemon-data
+```
+
+### 🟢 **Script bash no ejecuta (WSL/Linux)**
+**Síntoma:** `./kafka-setup.sh: cannot execute: required file not found`
+**Causa:** Archivos creados en Windows con line endings CRLF
+
+**Solución:**
+```bash
+# Opción 1: Usar dos2unix
+dos2unix kafka-setup.sh
+chmod +x kafka-setup.sh
+
+# Opción 2: Recrear archivo
+rm kafka-setup.sh
+cat > kafka-setup.sh << 'EOF'
+#!/bin/bash
+echo "Creando topic pokemon-data..."
+docker exec kafka kafka-topics --create \
+    --bootstrap-server localhost:9092 \
+    --replication-factor 1 \
+    --partitions 3 \
+    --topic pokemon-data
+EOF
+chmod +x kafka-setup.sh
+```
+
+### ⚫ Producer no conecta a PokeAPI
+```bash
+# Verificar conectividad
+docker exec pokemon-producer ping 8.8.8.8
+docker exec pokemon-producer curl https://pokeapi.co/api/v2/pokemon/1
 ```
 
 </details>
@@ -381,8 +435,8 @@ curl http://localhost:5000/api/total-pokemon
 
 **✅ Productor funcionando:**
 ```
-INFO - Obtenido Pokemon: charizard (id: 6)
-INFO - Enviado a Kafka: pokemon-data
+INFO - Pokemon magnemite enviado - Partition: 0, Offset: 5
+INFO - Pokemon dragonite enviado - Partition: 0, Offset: 6
 ```
 
 **✅ Spark procesando:**
@@ -394,7 +448,62 @@ INFO - Batch 5: 3 registros escritos a raw_pokemon
 **✅ API funcionando:**
 ```
 INFO - Conectado a Cassandra
-INFO - get_type_distribution devolvió 5 tipos
+INFO:werkzeug:172.18.0.1 - - [GET /api/total-pokemon HTTP/1.1] 200 -
+```
+
+**✅ Cassandra con datos:**
+```bash
+$ make check-cassandra
+ count
+-------
+    25
+```
+
+**❌ API con imagen antigua:**
+```
+INFO:werkzeug:172.18.0.1 - - [GET /api/total-pokemon HTTP/1.1] 404 -
+```
+
+</details>
+
+<details>
+<summary>🔧 <strong>Comandos de Diagnóstico Rápido</strong></summary>
+
+```bash
+# Pipeline completo
+make status                           # Estado general
+curl http://localhost:5000/health     # API health check
+curl http://localhost:5000/api/total-pokemon  # Endpoint específico
+make check-cassandra                  # Datos en BD
+
+# Verificar flujo de datos
+make logs-producer | grep "enviado"   # Pokemon siendo enviados
+make logs-spark | grep "registros"    # Batches procesados
+docker exec kafka kafka-console-consumer \
+    --bootstrap-server localhost:9092 \
+    --topic pokemon-data --max-messages 3  # Mensajes en Kafka
+```
+
+</details>
+
+<details>
+<summary>🚀 <strong>Reinicio Limpio</strong></summary>
+
+**Si nada funciona, reinicio completo:**
+```bash
+# Parar todo
+docker compose down
+
+# Limpiar imágenes y volúmenes
+docker compose down -v
+docker system prune -f
+
+# Reconstruir desde cero
+make setup
+
+# Esperar 2-3 minutos y verificar
+make status
+curl http://localhost:5000/api/total-pokemon
 ```
 
 </details>
