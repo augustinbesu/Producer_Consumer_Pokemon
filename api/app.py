@@ -167,5 +167,29 @@ def query():
         logging.error(f"Error in query endpoint: {e}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/total-pokemon')
+def api_total_pokemon():
+    """Endpoint individual para total de Pokemon"""
+    total = cassandra_api.get_total_pokemon()
+    return jsonify({"total": total})
+
+@app.route('/api/type-distribution')  
+def api_type_distribution():
+    """Endpoint individual para distribución de tipos"""
+    data = cassandra_api.get_type_distribution()
+    return jsonify(data)
+
+@app.route('/api/top-pokemon')
+def api_top_pokemon():
+    """Endpoint individual para top Pokemon"""
+    data = cassandra_api.get_top_pokemon()
+    return jsonify(data)
+
+@app.route('/api/pokemon-by-hour')
+def api_pokemon_by_hour():
+    """Endpoint individual para Pokemon por hora"""
+    data = cassandra_api.get_pokemon_by_time()
+    return jsonify(data)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
