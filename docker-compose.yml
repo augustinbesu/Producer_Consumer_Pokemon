@@ -1,0 +1,168 @@
+version: '3.8'
+
+services:
+  # Zookeeper para Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: kafka-broker-api-versions --bootstrap-server kafka:9092
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cassandra
+  cassandra:
+    image: cassandra:4.1
+    hostname: cassandra
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=pokemon_cluster
+      - CASSANDRA_DATACENTER=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # Inicializar Cassandra
+  cassandra-init:
+    image: cassandra:4.1
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./cassandra/init.cql:/init.cql
+    command: /bin/bash -c "echo 'Waiting for Cassandra...' && sleep 10 && cqlsh cassandra -f /init.cql"
+
+  # Productor de datos
+  pokemon-producer:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: pokemon-producer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=pokemon-data
+    restart: unless-stopped
+
+  # Consumidor de datos
+  pokemon-consumer:
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
+    container_name: pokemon-consumer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=pokemon-data
+
+  # Procesador Spark
+  spark-processor:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-processor
+    depends_on:
+      - cassandra-init
+      - kafka
+    environment:
+      - SPARK_MASTER_URL=local[2]
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - CASSANDRA_HOST=cassandra
+    volumes:
+      - ./spark:/app
+
+  # Jupyter
+  jupyter:
+    build:
+      context: ./jupyter
+      dockerfile: Dockerfile
+    container_name: jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=pokemon123
+    volumes:
+      - ./jupyter/notebooks:/home/jovyan/work
+    depends_on:
+      - cassandra-init
+      - kafka
+
+  # API REST para Grafana
+  pokemon-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: pokemon-api
+    ports:
+      - "5000:5000"
+    depends_on:
+      - cassandra-init
+    environment:
+      - CASSANDRA_HOST=cassandra
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:10.2.0
+    hostname: grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=pokemon123
+      - GF_INSTALL_PLUGINS=grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - pokemon-api
+    restart: unless-stopped
+
+volumes:
+  cassandra_data:
+  grafana_data:
+
+networks:
+  default:
+    name: pokemon-network
