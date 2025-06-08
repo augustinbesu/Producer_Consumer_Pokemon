@@ -1,75 +1,170 @@
-# Pokemon Streaming Analytics
+<div align="center">
 
-Un proyecto de ejemplo que demuestra la implementación de un pipeline completo de datos en tiempo real, utilizando Pokemon como dataset de ejemplo para ilustrar conceptos fundamentales de big data y sistemas distribuidos.
+# 🌟 Pokemon Streaming Analytics
 
-**Desarrollado por: Augustin Alexandru Besu**
+**Ejemplo práctico de arquitectura Producer-Consumer con tecnologías Big Data**
 
-## Arquitectura del Sistema
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)](https://kafka.apache.org/)
+[![Apache Spark](https://img.shields.io/badge/Apache%20Spark-FDEE21?style=for-the-badge&logo=apachespark&logoColor=black)](https://spark.apache.org/)
+[![Cassandra](https://img.shields.io/badge/cassandra-%231287B1.svg?style=for-the-badge&logo=apache-cassandra&logoColor=white)](https://cassandra.apache.org/)
+[![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)](https://grafana.com/)
 
+*Un pipeline completo de datos en tiempo real utilizando Pokemon como dataset para demostrar conceptos fundamentales de sistemas distribuidos*
+
+**Desarrollado por:** [Augustin Alexandru Besu](https://github.com/augustinbesu)
+
+</div>
+
+---
+
+## 🎯 Objetivo del Proyecto
+
+Este proyecto implementa una **arquitectura de streaming distribuida** completa, demostrando:
+
+- ✅ **Patrón Producer-Consumer** con Apache Kafka
+- ✅ **Stream Processing** en tiempo real con Apache Spark
+- ✅ **Almacenamiento NoSQL** escalable con Cassandra
+- ✅ **Visualización en tiempo real** con Grafana
+- ✅ **Análisis interactivo** con Jupyter
+- ✅ **APIs RESTful** para exposición de datos
+- ✅ **Containerización completa** con Docker
+
+---
+
+## 🏗️ Arquitectura del Sistema
+
+```mermaid
+graph TB
+    subgraph "Data Source"
+        A[🔗 PokeAPI]
+    end
+    
+    subgraph "Data Ingestion"
+        B[📡 Pokemon Producer<br/>Python]
+    end
+    
+    subgraph "Message Broker"
+        C[🚀 Apache Kafka<br/>Topic: pokemon-data]
+    end
+    
+    subgraph "Stream Processing"
+        D[⚡ Apache Spark<br/>Streaming]
+    end
+    
+    subgraph "Storage Layer"
+        E[🗄️ Apache Cassandra<br/>NoSQL Database]
+    end
+    
+    subgraph "API Layer"
+        F[🌐 REST API<br/>Flask]
+    end
+    
+    subgraph "Visualization"
+        G[📊 Grafana Dashboard]
+        H[📈 Jupyter Analytics]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    F --> H
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style D fill:#e8f5e8
+    style E fill:#fce4ec
+    style F fill:#f1f8e9
+    style G fill:#fff8e1
+    style H fill:#e3f2fd
 ```
-PokeAPI → Kafka Producer → Kafka Cluster → Spark Streaming → Cassandra
-                                                ↓
-                                         REST API ← Grafana Dashboard
-                                                ↓
-                                         Jupyter Analytics
+
+### 🔧 Componentes del Sistema
+
+| Componente | Tecnología | Función | Puerto |
+|------------|------------|---------|--------|
+| **Data Producer** | Python + Requests | Obtiene datos de PokeAPI y envía a Kafka | - |
+| **Message Broker** | Apache Kafka | Cola de mensajes distribuida | 29092 |
+| **Stream Processor** | Apache Spark | Procesamiento en tiempo real | 8080 |
+| **Database** | Apache Cassandra | Almacenamiento NoSQL escalable | 9042 |
+| **REST API** | Flask | Exposición de datos | 5000 |
+| **Dashboard** | Grafana | Visualización en tiempo real | 3000 |
+| **Analytics** | Jupyter Lab | Análisis interactivo | 8888 |
+
+---
+
+## 🚀 Inicio Rápido
+
+### 📋 Prerrequisitos
+
+- 🐳 **Docker & Docker Compose** (v20.10+)
+- 💾 **8GB RAM mínimo** disponible
+- 🔌 **Puertos libres**: 3000, 5000, 8080, 8888, 9042, 29092
+
+### ⚡ Instalación en 3 pasos
+
+<details>
+<summary>📁 <strong>1. Clonar el repositorio</strong></summary>
+
+```bash
+git clone https://github.com/augustinbesu/Producer_Consumer_Pokemon.git
+cd Producer_Consumer_Pokemon
+```
+</details>
+
+<details>
+<summary>🔧 <strong>2. Desplegar el ecosistema completo</strong></summary>
+
+```bash
+make setup
 ```
 
-### Componentes Principales
+**Este comando automáticamente:**
+- 🏗️ Construye todas las imágenes Docker
+- 🚀 Levanta todos los servicios
+- ⚙️ Configura Kafka con topics
+- 🗃️ Inicializa Cassandra con esquemas
+- 🔄 Inicia el pipeline de datos
 
-- **Producer**: Obtiene datos de Pokemon desde PokeAPI y los envía a Kafka
-- **Kafka**: Sistema de streaming distribuido para manejo de datos en tiempo real
-- **Spark**: Procesamiento de streams en tiempo real con escritura a Cassandra
-- **Cassandra**: Base de datos NoSQL para almacenamiento escalable
-- **API REST**: Exposición de datos para Grafana
-- **Grafana**: Dashboard de visualización en tiempo real
-- **Jupyter**: Análisis interactivo y exploración de datos
+</details>
 
-## Inicio Rápido
+<details>
+<summary>✅ <strong>3. Verificar el estado</strong></summary>
 
-### Prerrequisitos
-- Docker y Docker Compose
-- Al menos 8GB RAM disponible
-- Puertos libres: 8080, 8888, 3000, 9042, 29092, 5000
+```bash
+make status              # Estado general
+make check-cassandra     # Verificar base de datos
+make logs               # Ver logs en tiempo real
+```
+</details>
 
-### Instalación
+---
 
-1. **Clonar el repositorio**:
-   ```bash
-   git clone <tu-repo>
-   cd pokemon-streaming
-   ```
+## 🌐 Interfaces de Usuario
 
-2. **Configuración completa automática**:
-   ```bash
-   make setup
-   ```
-   
-   Este comando:
-   - Construye todas las imágenes Docker
-   - Levanta todos los servicios
-   - Configura Kafka con el topic necesario
-   - Inicializa Cassandra con las tablas requeridas
+<div align="center">
 
-3. **Verificar el estado**:
-   ```bash
-   make status
-   make check-cassandra
-   ```
+| 🖥️ Servicio | 🔗 URL | 🔐 Credenciales | 📝 Descripción |
+|-------------|---------|-----------------|-----------------|
+| **🎨 Grafana** | [localhost:3000](http://localhost:3000) | `admin` / `pokemon123` | Dashboard en tiempo real |
+| **📊 Jupyter** | [localhost:8888](http://localhost:8888) | Token: `pokemon123` | Análisis de datos |
+| **🔌 REST API** | [localhost:5000](http://localhost:5000) | - | API de datos |
+| **⚡ Spark UI** | [localhost:8080](http://localhost:8080) | - | Monitor de Spark |
 
-## Servicios y Acceso
+</div>
 
-| Servicio | URL | Credenciales | Descripción |
-|----------|-----|--------------|-------------|
-| **Grafana Dashboard** | http://localhost:3000 | admin/pokemon123 | Visualización en tiempo real |
-| **Jupyter Lab** | http://localhost:8888 | token: pokemon123 | Análisis interactivo |
-| **REST API** | http://localhost:5000 | - | API de datos Pokemon |
-| **Spark Master UI** | http://localhost:8080 | - | Monitoreo de Spark |
-| **Kafka** | localhost:29092 | - | Broker de mensajes |
-| **Cassandra** | localhost:9042 | - | Base de datos |
+---
 
-## Estructura de Datos
+## 📊 Schema de Base de Datos
 
-### Tabla `raw_pokemon`
+<details>
+<summary>🗃️ <strong>Estructura de Cassandra</strong></summary>
+
+### 📋 Tabla `raw_pokemon`
 ```sql
 CREATE TABLE raw_pokemon (
     id int PRIMARY KEY,
@@ -84,7 +179,7 @@ CREATE TABLE raw_pokemon (
 );
 ```
 
-### Tabla `pokemon_stats`
+### 📈 Tabla `pokemon_stats`
 ```sql
 CREATE TABLE pokemon_stats (
     stat_type text PRIMARY KEY,
@@ -96,7 +191,7 @@ CREATE TABLE pokemon_stats (
 );
 ```
 
-### Tabla `pokemon_by_type`
+### 🏷️ Tabla `pokemon_by_type`
 ```sql
 CREATE TABLE pokemon_by_type (
     type text,
@@ -108,186 +203,211 @@ CREATE TABLE pokemon_by_type (
 );
 ```
 
-## Funcionalidades Principales
+</details>
 
-### Dashboard de Grafana
-- **Total Pokemon Procesados**: Contador en tiempo real
-- **Pokemon por Tiempo**: Gráfico temporal de procesamiento
-- **Distribución por Tipos**: Top 5 tipos más comunes
-- **Top Pokemon por Experiencia**: Ranking de Pokemon más poderosos
+---
 
-### Jupyter Analytics
-- Análisis exploratorio de datos
-- Visualizaciones interactivas con Plotly
-- Estadísticas por tipo de Pokemon
-- Análisis de correlaciones entre atributos
+## 🎯 Funcionalidades Principales
 
-### API REST Endpoints
-```
-GET  /health                    # Estado del servicio
-GET  /api/total-pokemon        # Total de Pokemon procesados
-GET  /api/type-distribution    # Distribución por tipos
-GET  /api/top-pokemon          # Top Pokemon por experiencia
-GET  /api/pokemon-by-hour      # Pokemon procesados por hora
-POST /query                    # Endpoint principal para Grafana
-POST /search                   # Búsqueda de métricas disponibles
-```
+### 📊 Dashboard de Grafana
+- 🔢 **Contador total** de Pokemon procesados
+- ⏰ **Timeline** de procesamiento por hora
+- 🥧 **Distribución circular** de tipos de Pokemon
+- 🏆 **Ranking** de Pokemon por experiencia
 
-## Comandos Útiles
+### 🔬 Jupyter Analytics
+- 📈 **Visualizaciones interactivas** con Plotly
+- 📊 **Análisis estadístico** por tipos
+- 🔍 **Exploración de datos** en tiempo real
+- 📋 **Correlaciones** entre atributos
 
-### Monitoreo
+### 🔌 API REST Endpoints
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/health` | Estado del servicio |
+| `GET` | `/api/total-pokemon` | Total procesados |
+| `GET` | `/api/type-distribution` | Distribución por tipos |
+| `GET` | `/api/top-pokemon` | Top por experiencia |
+| `POST` | `/query` | Endpoint para Grafana |
+
+---
+
+## 🛠️ Comandos de Gestión
+
+<details>
+<summary>👁️ <strong>Monitoreo</strong></summary>
+
 ```bash
-# Ver estado de todos los servicios
-make status
-
-# Ver logs en tiempo real
-make logs
-
-# Ver logs específicos
-make logs-producer    # Logs del productor
-make logs-spark      # Logs de Spark
-make logs-grafana    # Logs de Grafana
+make status              # Estado de servicios
+make logs               # Logs en tiempo real
+make logs-producer      # Logs del productor
+make logs-spark         # Logs de Spark
+make logs-grafana       # Logs de Grafana
 ```
+</details>
 
-### Verificación de Datos
+<details>
+<summary>🔍 <strong>Verificación</strong></summary>
+
 ```bash
-# Verificar datos en Cassandra
-make check-cassandra
+make check-cassandra    # Datos en Cassandra
+make check-kafka       # Topics de Kafka
 
-# Verificar topics de Kafka
-docker exec kafka kafka-topics --list --bootstrap-server localhost:9092
-
-# Ver datos raw en Cassandra
-docker exec cassandra cqlsh -e "SELECT * FROM pokemon_data.raw_pokemon LIMIT 10;"
+# Consultas directas
+docker exec cassandra cqlsh -e "SELECT COUNT(*) FROM pokemon_data.raw_pokemon;"
+docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic pokemon-data --from-beginning
 ```
+</details>
 
-### Gestión de Servicios
+<details>
+<summary>🔄 <strong>Gestión de Servicios</strong></summary>
+
 ```bash
-# Reiniciar servicios específicos
-make restart-producer
-make restart-spark
-make restart-grafana
-
-# Limpiar todo el sistema
-make clean
-
-# Reconstruir desde cero
-make setup
+make restart-producer   # Reiniciar productor
+make restart-spark      # Reiniciar Spark
+make restart-grafana    # Reiniciar Grafana
+make clean             # Limpiar todo
+make setup             # Reconstruir completo
 ```
+</details>
 
-## Pipeline de Datos en Detalle
+---
 
-### 1. Ingesta de Datos
-- **Frecuencia**: Cada 3-8 segundos (aleatorio)
-- **Fuente**: PokeAPI (https://pokeapi.co/)
-- **Formato**: JSON con atributos completos del Pokemon
+## 📈 Pipeline de Datos
+
+### 1️⃣ **Ingesta** 
+- **Fuente**: [PokeAPI](https://pokeapi.co/)
+- **Frecuencia**: 3-8 segundos (aleatorio)
+- **Formato**: JSON estructurado
 - **Volumen**: ~100-200 Pokemon/hora
 
-### 2. Streaming con Kafka
+### 2️⃣ **Streaming**
+- **Broker**: Apache Kafka
 - **Topic**: `pokemon-data`
 - **Particiones**: 3
-- **Replicación**: 1 (desarrollo)
 - **Retención**: 24 horas
 
-### 3. Procesamiento con Spark
+### 3️⃣ **Procesamiento**
+- **Engine**: Apache Spark Streaming
 - **Trigger**: Cada 10-20 segundos
-- **Operaciones**: 
-  - Parseo de JSON
-  - Limpieza de datos
-  - Cálculo de estadísticas agregadas
-  - Escritura a múltiples tablas
+- **Operaciones**: Parseo, limpieza, agregaciones
 
-### 4. Almacenamiento en Cassandra
+### 4️⃣ **Almacenamiento**
+- **BD**: Apache Cassandra
 - **Estrategia**: SimpleStrategy
-- **Factor de replicación**: 1
-- **Consistency Level**: ONE (desarrollo)
+- **Replicación**: Factor 1
 
-## Troubleshooting
+---
 
-### Problemas Comunes
+## 🧰 Stack Tecnológico
 
-**Servicios no inician**:
+<div align="center">
+
+| Categoría | Tecnología | Versión | Propósito |
+|-----------|------------|---------|-----------|
+| **🐳 Contenedores** | Docker Compose | 3.8 | Orquestación |
+| **📨 Streaming** | Apache Kafka | 2.8 | Message Broker |
+| **⚡ Procesamiento** | Apache Spark | 3.3 | Stream Processing |
+| **🗄️ Base de Datos** | Apache Cassandra | 4.0 | NoSQL Storage |
+| **🌐 API** | Flask | 2.3 | REST Services |
+| **📊 Visualización** | Grafana | 9.0 | Dashboards |
+| **🔬 Analytics** | Jupyter Lab | 3.6 | Data Science |
+| **🐍 Lenguaje** | Python | 3.9 | Backend |
+
+</div>
+
+---
+
+## 🚨 Troubleshooting
+
+<details>
+<summary>⚠️ <strong>Problemas Comunes</strong></summary>
+
+### 🔴 Servicios no inician
 ```bash
-# Verificar logs específicos
-docker compose logs <nombre-servicio>
-
-# Verificar recursos
-docker system df
+docker compose logs <servicio>
+docker system df  # Verificar espacio
 ```
 
-**Cassandra no responde**:
+### 🟡 Cassandra no responde
 ```bash
-# Cassandra necesita tiempo para inicializar (1-2 minutos)
-# Verificar estado
+# Esperar 1-2 minutos para inicialización
 docker exec cassandra nodetool status
 ```
 
-**Spark no conecta a Cassandra**:
+### 🟠 Spark desconectado
 ```bash
-# Verificar conectividad
 docker exec spark-processor ping cassandra
-
-# Reiniciar procesador
 make restart-spark
 ```
 
-**Grafana no muestra datos**:
+### 🔵 Grafana sin datos
 ```bash
-# Verificar API
 curl http://localhost:5000/api/total-pokemon
-
-# Verificar datasource en Grafana
-# Admin → Data Sources → Test connection
+# Verificar datasource en Grafana UI
 ```
 
-### Logs Importantes
+</details>
 
-**Productor funcionando**:
+<details>
+<summary>📋 <strong>Logs de Verificación</strong></summary>
+
+**✅ Productor funcionando:**
 ```
 INFO - Obtenido Pokemon: charizard (id: 6)
 INFO - Enviado a Kafka: pokemon-data
 ```
 
-**Spark procesando**:
+**✅ Spark procesando:**
 ```
-INFO - Batch 5: Escribiendo 3 registros a Cassandra...
+INFO - Batch 5: Escribiendo 3 registros a Cassandra
 INFO - Batch 5: 3 registros escritos a raw_pokemon
 ```
 
-**API funcionando**:
+**✅ API funcionando:**
 ```
 INFO - Conectado a Cassandra
-INFO - get_type_distribution devolvió 15 tipos
+INFO - get_type_distribution devolvió 5 tipos
 ```
 
-## Tecnologías Utilizadas
-
-- **Docker**: Containerización y orquestación
-- **Apache Kafka**: Streaming de datos en tiempo real
-- **Apache Spark**: Procesamiento distribuido de streams
-- **Apache Cassandra**: Base de datos NoSQL distribuida
-- **Flask**: API REST ligera
-- **Grafana**: Dashboards y visualización
-- **Jupyter**: Análisis interactivo de datos
-- **Python**: Lenguaje principal del proyecto
-
-## Posibles Extensiones
-
-- **Kafka Connect**: Para conectores automáticos
-- **Apache Airflow**: Para orquestación de workflows
-- **Redis**: Para caché de consultas frecuentes
-- **Elasticsearch**: Para búsquedas textuales avanzadas
-- **Machine Learning**: Para predicciones sobre Pokemon
-
-## Métricas de Rendimiento
-
-En un entorno típico de desarrollo:
-- **Latencia de ingesta**: < 100ms
-- **Throughput de Kafka**: 100-1000 mensajes/segundo
-- **Latencia de Spark**: 10-30 segundos por batch
-- **Consultas de API**: < 200ms promedio
-- **Actualización de Grafana**: Cada 5 segundos
+</details>
 
 ---
 
-**Nota**: Este proyecto está diseñado para fines educativos y demostración de tecnologías de big data. Para producción, considerar configuraciones adicionales de seguridad, monitoreo y escalabilidad.
+## 📊 Métricas de Rendimiento
+
+<div align="center">
+
+| Métrica | Valor Típico | Descripción |
+|---------|--------------|-------------|
+| **⚡ Latencia de ingesta** | < 100ms | Tiempo desde API hasta Kafka |
+| **🚀 Throughput Kafka** | 100-1K msg/seg | Capacidad de mensajes |
+| **⏱️ Latencia Spark** | 10-30 segundos | Procesamiento por batch |
+| **🔌 API Response** | < 200ms | Tiempo de respuesta |
+| **📊 Actualización Grafana** | 5 segundos | Frecuencia de refresh |
+
+</div>
+
+---
+
+## 🔮 Posibles Extensiones
+
+- 🔗 **Kafka Connect** para conectores automáticos
+- 🌊 **Apache Airflow** para orquestación de workflows  
+- ⚡ **Redis** para caché de consultas frecuentes
+- 🔍 **Elasticsearch** para búsquedas textuales
+- 🤖 **Machine Learning** para predicciones de Pokemon
+- 🔒 **Security** con autenticación y autorización
+- 🌍 **Kubernetes** para despliegue en producción
+
+---
+
+<div align="center">
+
+## 🎓 Fines Educativos
+
+> Este proyecto está diseñado para **demostrar conceptos de Big Data** y **sistemas distribuidos**. 
+> Para entornos de producción, considerar configuraciones adicionales de **seguridad**, **monitoreo** y **escalabilidad**.
+
+</div>
